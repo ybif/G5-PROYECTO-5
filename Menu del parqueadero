@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    vector<string> parqueadero; 
+    int opcion;
+    string vehiculo;
+
+   
+    opcion = 0;
+
+    while (opcion != 3) {
+        cout << "Bienvenido al menú del parqueadero." << endl;
+        cout << "1. Ingresar un vehículo" << endl;
+        cout << "2. Sacar un vehículo" << endl;
+        cout << "3. Salir" << endl;
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                cout << "Ingrese la placa del vehículo: ";
+                cin >> vehiculo;
+                parqueadero.push_back(vehiculo);
+                cout << "Vehículo ingresado: " << vehiculo << endl;
+                break;
+
+            case 2:
+                if (parqueadero.empty()) {
+                    cout << "No hay vehículos en el parqueadero." << endl;
+                } else {
+                    cout << "Ingrese la placa del vehículo a sacar: ";
+                    cin >> vehiculo;
+                    auto it = find(parqueadero.begin(), parqueadero.end(), vehiculo);
+                    if (it != parqueadero.end()) {
+                        parqueadero.erase(it);
+                        cout << "Vehículo sacado: " << vehiculo << endl;
+                    } else {
+                        cout << "Vehículo no encontrado." << endl;
+                    }
+                }
+                break;
+
+            case 3:
+                cout << "Saliendo del programa. Gracias por utilizar el parqueadero." << endl;
+                break;
+
+            default:
+                cout << "Opción no válida. Intente de nuevo." << endl;
+                break;
+        }
+
+        cout << "Vehículos en el parqueadero: " << parqueadero.size() << endl;
+    }
+
+    return 0;
+}
