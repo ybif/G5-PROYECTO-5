@@ -1,0 +1,108 @@
+#include <iostream>
+using namespace std;
+
+int verdadero = 1;
+int falso = 0;
+int tarifa_por_min = 40;
+
+int main() {
+    int puestos_maximos = 10;
+    char parqueadero[puestos_maximos][10]; 
+    int hora_ingreso[puestos_maximos], min_ingreso[puestos_maximos]; 
+    int totalVehiculos = 0;
+    int opcion;
+    char vehiculo[10];
+
+    opcion = falso;
+    while (opcion != 3) {
+        cout << "bienvenido al menú del parqueadero." << endl;
+        cout << "1. ingresar un vehículo" << endl;
+        cout << "2. sacar un vehículo" << endl;
+        cout << "3. salir" << endl;
+        cout << "seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                if (totalVehiculos < puestos_maximos) {
+                    cout << "ingrese la placa del vehículo: ";
+                    cin >> vehiculo;
+                    for (int i = 0; i < 10; i++) {
+                        parqueadero[totalVehiculos][i] = vehiculo[i];
+                    }
+                    cout << "ingrese hora de ingreso (0-23): ";
+                    cin >> hora_ingreso[totalVehiculos];
+                    cout << "ingrese minutos de ingreso (0-59): ";
+                    cin >> min_ingreso[totalVehiculos];
+
+                    totalVehiculos++;
+                    cout << "vehículo ingresado: " << vehiculo << endl;
+                } else {
+                    cout << "parqueadero lleno. no se pueden ingresar más vehículos." << endl;
+                }
+                break;
+            case 2:
+                if (totalVehiculos == 0) {
+                    cout << "no hay vehículos en el parqueadero." << endl;
+                } else {
+                    cout << "ingrese la placa del vehículo a sacar: ";
+                    cin >> vehiculo;
+                    int encontrado = falso;
+                    for (int i = 0; i < totalVehiculos; i++) {
+                        int esIgual = verdadero;
+                        for (int j = 0; j < 10; j++) {
+                            if (parqueadero[i][j] != vehiculo[j]) {
+                                esIgual = falso;
+                                break;
+                            }
+                        }
+                        if (esIgual == verdadero) {
+                            
+                            int hora_salida, min_salida;
+                            cout << "ingrese hora de salida (0-23): ";
+                            cin >> hora_salida;
+                            cout << "ingrese minutos de salida (0-59): ";
+                            cin >> min_salida;
+
+                            
+                            int total_min_ingreso = hora_ingreso[i] * 60 + min_ingreso[i];
+                            int total_min_salida = hora_salida * 60 + min_salida;
+                            int tiempo_estancia = total_min_salida - total_min_ingreso;
+
+                            if (tiempo_estancia < 0) {
+                                cout << "hora de salida no válida." << endl;
+                            } else {
+                                int costo = tiempo_estancia * tarifa_por_min;
+                                
+                                for (int k = i; k < totalVehiculos - 1; k++) {
+                                    for (int j = 0; j < 10; j++) {
+                                        parqueadero[k][j] = parqueadero[k + 1][j];
+                                    }
+                                    hora_ingreso[k] = hora_ingreso[k + 1];
+                                    min_ingreso[k] = min_ingreso[k + 1];
+                                }
+                                totalVehiculos--;
+                                cout << "vehículo sacado: " << vehiculo << endl;
+                                cout << "tiempo total: " << tiempo_estancia / 60 << " horas y " << tiempo_estancia % 60 << " min." << endl;
+                                cout << "total a pagar: " << costo << " pesos." << endl;
+                            }
+                            encontrado = verdadero;
+                            break;
+                        }
+                    }
+                    if (encontrado == falso) {
+                        cout << "vehículo no encontrado." << endl;
+                    }
+                }
+                break;
+            case 3:
+                cout << "saliendo del programa. gracias por utilizar el parqueadero." << endl;
+                break;
+            default:
+                cout << "opción no válida. intente de nuevo." << endl;
+                break;
+        }
+        cout << "vehículos en el parqueadero: " << totalVehiculos << endl;
+    }
+    return 0;
+}
