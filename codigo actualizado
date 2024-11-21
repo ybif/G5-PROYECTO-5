@@ -1,0 +1,217 @@
+#include <iostream>
+using namespace std;
+
+int verdadero = 1;
+int falso = 0;
+int tarifa_por_min = 40;
+
+bool validarPlaca(char placa[]);
+bool placaRepetida(char parqueadero[][10], int totalVehiculos, char placa[]);
+bool validarHora(int hora);
+
+int main() {
+    int puestos_maximos = 40;
+    char parqueadero[puestos_maximos][10] = {""};
+    int hora_ingreso[puestos_maximos], min_ingreso[puestos_maximos];
+    int totalVehiculos = 0;
+    int opcion;
+    char vehiculo[10];
+    int ingresosTotales = 0;
+
+    opcion = falso;
+    while (opcion != 6) {  
+        cout << "Bienvenido al menú del parqueadero." << endl;
+        cout << "1. Ingresar un vehículo" << endl;
+        cout << "2. Sacar un vehículo" << endl;
+        cout << "3. Ver puestos disponibles" << endl;
+        cout << "4. Ver ingresos totales" << endl;
+        cout << "5. Cambiar tarifa por minuto (Tarifa actual: " << tarifa_por_min << " pesos)" << endl;
+        cout << "6. Salir" << endl;
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                if (totalVehiculos < puestos_maximos) {
+                    bool formato_valido = falso;
+                    bool placa_duplicada = verdadero;
+                    int puesto_seleccionado;
+                    
+                    while (!formato_valido || placa_duplicada) {
+                        cout << "Ingrese la placa del vehículo (formato ABC123): ";
+                        cin >> vehiculo;
+
+                        if (validarPlaca(vehiculo)) {
+                            formato_valido = verdadero;
+                            if (!placaRepetida(parqueadero, totalVehiculos, vehiculo)) {
+                                placa_duplicada = falso;
+                            } else {
+                                cout << "Error: La placa ya existe en el parqueadero." << endl;
+                            }
+                        } else {
+                            cout << "Placa inválida. Debe tener 3 letras mayúsculas seguidas de 3 números." << endl;
+                        }
+                    }
+
+                    bool puesto_valido = falso;
+                    while (!puesto_valido) {
+                        cout << "Ingrese el número del puesto (1-" << puestos_maximos << "): ";
+                        cin >> puesto_seleccionado;
+                        puesto_seleccionado--; 
+
+                        if (puesto_seleccionado >= 0 && puesto_seleccionado < puestos_maximos && parqueadero[puesto_seleccionado][0] == '\0') {
+                            puesto_valido = verdadero;
+                        } else {
+                            cout << "Puesto inválido o ya ocupado." << endl;
+                        }
+                    }
+
+                    for (int i = 0; i < 10; i++) {
+                        parqueadero[puesto_seleccionado][i] = vehiculo[i];
+                    }
+
+                    bool hora_valida = falso;
+                    while (!hora_valida) {
+                        cout << "Ingrese hora de ingreso (6-20): ";
+                        cin >> hora_ingreso[puesto_seleccionado];
+                        if (validarHora(hora_ingreso[puesto_seleccionado])) {
+                            hora_valida = verdadero;
+                        } else {
+                            cout << "Hora inválida. Debe estar entre 6:00 y 20:59 horas." << endl;
+                        }
+                    }
+
+                    cout << "Ingrese minutos de ingreso (0-59): ";
+                    cin >> min_ingreso[puesto_seleccionado];
+
+                    totalVehiculos++;
+                    cout << "Vehículo ingresado en el puesto " << (puesto_seleccionado + 1) << ": " << vehiculo << endl;
+                } else {
+                    cout << "Parqueadero lleno. No se pueden ingresar más vehículos." << endl;
+                }
+                break;
+
+            case 2:
+                if (totalVehiculos == 0) {
+                    cout << "No hay vehículos en el parqueadero." << endl;
+                } else {
+                    cout << "Ingrese la placa del vehículo a sacar: ";
+                    cin >> vehiculo;
+                    int encontrado = falso;
+                    for (int i = 0; i < puestos_maximos; i++) {
+                        int esIgual = verdadero;
+                        for (int j = 0; j < 10; j++) {
+                            if (parqueadero[i][j] != vehiculo[j]) {
+                                esIgual = falso;
+                                break;
+                            }
+                        }
+                        if (esIgual == verdadero) {
+                            int hora_salida, min_salida;
+                            bool hora_valida = falso;
+                            while (!hora_valida) {
+                                cout << "Ingrese hora de salida (6-20): ";
+                                cin >> hora_salida;
+                                if (validarHora(hora_salida)) {
+                                    hora_valida = verdadero;
+                                } else {
+                                    cout << "Hora inválida. Debe estar entre 6:00 y 20:59 horas.\n";
+                                }
+                            }
+                            cout << "Ingrese minutos de salida (0-59): ";
+                            cin >> min_salida;
+
+                            int total_min_ingreso = hora_ingreso[i] * 60 + min_ingreso[i];
+                            int total_min_salida = hora_salida * 60 + min_salida;
+
+                            int tiempo_estancia;
+                            if (total_min_salida < total_min_ingreso) {
+                                tiempo_estancia = (total_min_salida + 1440) - total_min_ingreso;
+                            } else {
+                                tiempo_estancia = total_min_salida - total_min_ingreso;
+                            }
+
+                            int costo = tiempo_estancia * tarifa_por_min;
+                            ingresosTotales += costo;
+
+                            for (int j = 0; j < 10; j++) {
+                                parqueadero[i][j] = '\0'; 
+                            }
+                            cout << "Vehículo sacado: " << vehiculo << endl;
+                            cout << "Tiempo total: " << tiempo_estancia / 60 << " horas y " << tiempo_estancia % 60 << " min." << endl;
+                            cout << "Total a pagar: " << costo << " pesos." << endl;
+
+                            totalVehiculos--;
+                            encontrado = verdadero;
+                            break;
+                        }
+                    }
+                    if (encontrado == falso) {
+                        cout << "Vehículo no encontrado." << endl;
+                    }
+                }
+                break;
+
+            case 3:
+                cout << "Puestos disponibles: " << puestos_maximos - totalVehiculos << " de " << puestos_maximos << endl;
+                break;
+
+            case 4:
+                cout << "Ingresos totales del parqueadero: " << ingresosTotales << " pesos." << endl;
+                break;
+
+            case 5: {  
+                cout << "Ingrese la nueva tarifa por minuto: ";
+                cin >> tarifa_por_min;
+                cout << "Tarifa actualizada correctamente. Nueva tarifa: " << tarifa_por_min << " pesos por minuto." << endl;
+                break;
+            }
+
+            case 6:
+                cout << "Saliendo del programa. Gracias por utilizar el parqueadero." << endl;
+                break;
+
+            default:
+                cout << "Opción no válida. Intente de nuevo." << endl;
+                break;
+        }
+        cout << "Vehículos en el parqueadero: " << totalVehiculos << endl;
+    }
+    return 0;
+}
+
+bool validarPlaca(char placa[]) {
+    if ((placa[0] >= 'A' && placa[0] <= 'Z') &&
+        (placa[1] >= 'A' && placa[1] <= 'Z') &&
+        (placa[2] >= 'A' && placa[2] <= 'Z') &&
+        (placa[3] >= '0' && placa[3] <= '9') &&
+        (placa[4] >= '0' && placa[4] <= '9') &&
+        (placa[5] >= '0' && placa[5] <= '9')) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool placaRepetida(char parqueadero[][10], int totalVehiculos, char placa[]) {
+    for (int i = 0; i < totalVehiculos; i++) {
+        int esIgual = verdadero;
+        for (int j = 0; j < 10; j++) {
+            if (parqueadero[i][j] != placa[j]) {
+                esIgual = falso;
+                break;
+            }
+        }
+        if (esIgual == verdadero) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool validarHora(int hora) {
+    if (hora >= 6 && hora < 21) {
+        return true;
+    }
+    return false;
+}
